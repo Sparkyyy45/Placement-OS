@@ -53,25 +53,41 @@ export default function OnboardingPage() {
 
   async function handleComplete() {
     setLoading(true)
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    setKeyError("")
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        setKeyError("Not authenticated — try reloading")
+        setLoading(false)
+        return
+      }
 
-    // Save assessment
-    const body: Record<string, unknown> = { role, tier, timeline, hours: Number(hours) }
+      const body: Record<string, unknown> = { role, tier, timeline, hours: Number(hours) }
 
-    if (!useTrial && keyStatus === "valid") {
-      await saveKey(keyValue, keyProvider)
-      body.preferredProvider = keyProvider
+      if (!useTrial && keyStatus === "valid") {
+        await saveKey(keyValue, keyProvider)
+        body.preferredProvider = keyProvider
+      }
+
+      const res = await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Save failed" }))
+        setKeyError(err.error || "Failed to save onboarding data")
+        setLoading(false)
+        return
+      }
+
+      router.push("/dashboard")
+    } catch {
+      setKeyError("Network error — please try again")
+      setLoading(false)
     }
-
-    await fetch("/api/onboarding", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    })
-
-    router.push("/dashboard")
   }
 
   const providerLinks: Record<Provider, { name: string; url: string; steps: string[] }> = {

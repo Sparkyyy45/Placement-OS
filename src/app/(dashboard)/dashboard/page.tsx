@@ -24,12 +24,16 @@ export default function DashboardPage() {
   useEffect(() => {
     async function load() {
       const supabase = createClient()
-      const { data } = await supabase
-        .from("users")
-        .select("name, target_role, target_company_tier, daily_hours_available, onboarding_complete")
-        .single()
-      if (data) {
-        setProfile(data as Profile)
+      try {
+        const { data } = await supabase
+          .from("users")
+          .select("name, target_role, target_company_tier, daily_hours_available, onboarding_complete")
+          .maybeSingle()
+        if (data) {
+          setProfile(data as Profile)
+        }
+      } catch {
+        // Profile not found — user hasn't completed onboarding
       }
       setLoading(false)
     }

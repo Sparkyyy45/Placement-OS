@@ -34,10 +34,14 @@ export default function SignupPage() {
   }
 
   async function handleGoogleLogin() {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    })
+    try {
+      await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      })
+    } catch {
+      setError("Failed to sign in with Google")
+    }
   }
 
   return (

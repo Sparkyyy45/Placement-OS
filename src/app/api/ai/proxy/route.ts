@@ -7,7 +7,7 @@ import { getServiceClient } from "@/lib/db/client"
 
 export const runtime = "nodejs"
 
-const TRIAL_LIMIT = 20
+import { TRIAL_LIMIT } from "@/lib/constants"
 
 async function consumeTrial(userId: string): Promise<{ allowed: boolean; remaining: number }> {
   const db = getServiceClient()

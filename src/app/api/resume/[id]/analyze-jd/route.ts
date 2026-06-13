@@ -1,29 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase-server"
-import { calculateAtsScore } from "@/lib/ats/scorer"
-import type { ResumeSections, Resume } from "@/types/resume"
-
-function extractJdAnalysis(jdText: string) {
-  const lines = jdText.split("\n").map((l) => l.trim()).filter(Boolean)
-  const allTokens = jdText
-    .toLowerCase()
-    .replace(/[^a-z0-9+#.-]/g, " ")
-    .split(/\s+/)
-    .filter((t) => t.length > 1)
-
-  const allWords = jdText.toLowerCase().split(/\s+/)
-  const yearMatches = allWords
-    .map((w, i) => (/\d+/.test(w) ? parseInt(w) : null))
-    .filter((y): y is number => y !== null && y > 0 && y < 30)
-
-  return {
-    keywords: [...new Set(allTokens)],
-    requiredSkills: [],
-    preferredSkills: [],
-    responsibilities: lines.filter((l) => l.length > 20),
-    yearsExperience: yearMatches.length > 0 ? Math.max(...yearMatches) : undefined,
-  }
-}
+import { calculateAtsScore, extractJdAnalysis } from "@/lib/ats/scorer"
+import type { ResumeSections } from "@/types/resume"
 
 export async function POST(
   request: NextRequest,

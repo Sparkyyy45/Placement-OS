@@ -1,8 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-
-const TRIAL_LIMIT = 20
+import { TRIAL_LIMIT } from "@/lib/constants"
 
 interface TrialQuota {
   used: number

@@ -56,7 +56,7 @@ export default function DashboardLayout({
         <nav className="flex-1 py-4 space-y-1 px-2">
           {sidebarLinks.map((link) => {
             const Icon = link.icon
-            const active = pathname.startsWith(link.href)
+            const active = pathname === link.href || pathname.startsWith(link.href + "/")
             return (
               <Link
                 key={link.href}

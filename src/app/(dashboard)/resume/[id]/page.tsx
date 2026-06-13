@@ -7,8 +7,7 @@ import { ChatPanel } from "@/components/resume/chat-panel"
 import { PreviewPanel } from "@/components/resume/preview-panel"
 import { SectionIndicator } from "@/components/resume/section-indicator"
 import { useApiKey } from "@/hooks/use-api-key"
-import { useTrialQuota } from "@/hooks/use-trial-quota"
-import { Loader2, ArrowLeft, Save, Check, Target, FileDown } from "lucide-react"
+import { Loader2, ArrowLeft, Save, Check } from "lucide-react"
 import { JdAnalyzer } from "@/components/resume/jd-analyzer"
 import { PdfExport } from "@/components/resume/pdf-export"
 import { Button } from "@/components/ui/button"
@@ -23,7 +22,6 @@ export default function ResumeBuilderPage() {
 
   const store = useResumeStore()
   const { getKey } = useApiKey()
-  const { quota } = useTrialQuota()
 
   const [loading, setLoading] = useState(true)
   const [streaming, setStreaming] = useState(false)
@@ -177,24 +175,26 @@ export default function ResumeBuilderPage() {
         store.mergeSectionData(parsed.sectionData.section, parsed.sectionData.data)
       }
 
-      // Auto-advance on SECTION_COMPLETE
+      // Get fresh state after mutations
+      const freshState = useResumeStore.getState()
+
+      // Auto-advance on SECTION_COMPLETE (exclude review — end of flow)
       if (parsed.sectionComplete) {
-        const nextIdx = SECTION_ORDER.indexOf(store.currentSection) + 1
+        const nextIdx = SECTION_ORDER.indexOf(freshState.currentSection) + 1
         if (nextIdx < SECTION_ORDER.length && SECTION_ORDER[nextIdx] !== "review") {
-          const nextSection = SECTION_ORDER[nextIdx]
-          store.setCurrentSection(nextSection)
+          store.setCurrentSection(SECTION_ORDER[nextIdx])
         }
       }
 
-      // Save to DB
+      // Save to DB using fresh state
       await fetch(`/api/resume/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sections: store.sections,
+          sections: freshState.sections,
           current_section: parsed.sectionComplete
-            ? SECTION_ORDER[Math.min(SECTION_ORDER.indexOf(store.currentSection) + 1, SECTION_ORDER.length - 1)]
-            : store.currentSection,
+            ? SECTION_ORDER[Math.min(SECTION_ORDER.indexOf(freshState.currentSection) + 1, SECTION_ORDER.length - 1)]
+            : freshState.currentSection,
         }),
       })
     } catch {

@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server"
-import { generateText, streamText, createTextStreamResponse } from "ai"
+import { streamText, createTextStreamResponse } from "ai"
 import { createProviderClient, PROVIDER_CONFIGS } from "@/lib/ai/provider"
 import type { Provider } from "@/lib/ai/provider"
 import { createClient } from "@/lib/supabase-server"
 import { getServiceClient } from "@/lib/db/client"
 import { buildSectionPrompt } from "@/lib/ai/prompts"
+import { TRIAL_LIMIT } from "@/lib/constants"
 import type { SectionName, ResumeSections } from "@/types/resume"
-
-const TRIAL_LIMIT = 20
 
 async function consumeTrial(userId: string): Promise<{ allowed: boolean; remaining: number }> {
   const db = getServiceClient()

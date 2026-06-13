@@ -24,7 +24,7 @@ function tokenize(text: string): string[] {
     .filter((t) => t.length > 1 && !COMMON_WORDS.has(t))
 }
 
-function extractJdAnalysis(jdText: string): JdAnalysis {
+export function extractJdAnalysis(jdText: string): JdAnalysis {
   const lines = jdText.split("\n").map((l) => l.trim()).filter(Boolean)
   const allTokens = tokenize(jdText)
 

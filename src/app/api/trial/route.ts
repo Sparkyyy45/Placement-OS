@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase-server"
 import { getServiceClient } from "@/lib/db/client"
-
-const TRIAL_LIMIT = 20
+import { TRIAL_LIMIT } from "@/lib/constants"
 
 export async function GET() {
   const supabase = await createClient()
