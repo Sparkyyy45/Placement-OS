@@ -34,12 +34,13 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await request.json()
-  const { section, message, resumeState, messages: history, resumeId } = body as {
+  const { section, message, resumeState, messages: history, resumeId, targetJd } = body as {
     section: SectionName
     message: string
     resumeState: ResumeSections
     messages: { role: string; content: string }[]
     resumeId?: string
+    targetJd?: string
   }
 
   const apiKey = request.headers.get("x-api-key")
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
     .map((m) => `${m.role === "user" ? "Student" : "AI"}: ${m.content}`)
     .join("\n")
 
-  const systemPrompt = buildSectionPrompt(section, resumeState, historyText)
+  const systemPrompt = buildSectionPrompt(section, resumeState, historyText, targetJd)
 
   // Save user message to DB
   if (resumeId) {

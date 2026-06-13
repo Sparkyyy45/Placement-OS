@@ -10,7 +10,9 @@ import { useApiKey } from "@/hooks/use-api-key"
 import { useTrialQuota } from "@/hooks/use-trial-quota"
 import { Loader2, ArrowLeft, Save, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { parseAiResponse } from "@/lib/ai/prompts"
 import type { SectionName, ResumeMessage } from "@/types/resume"
+import { SECTION_ORDER } from "@/types/resume"
 
 export default function ResumeBuilderPage() {
   const params = useParams()
@@ -25,6 +27,7 @@ export default function ResumeBuilderPage() {
   const [streaming, setStreaming] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [targetJd, setTargetJd] = useState<string | undefined>(undefined)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Load resume
@@ -40,6 +43,9 @@ export default function ResumeBuilderPage() {
         store.setResume(data.id, data.name, data.sections, data.current_section)
         if (data.messages) {
           store.setMessages(data.messages)
+        }
+        if (data.target_jd) {
+          setTargetJd(data.target_jd)
         }
       } catch {
         router.push("/resume")
@@ -77,38 +83,12 @@ export default function ResumeBuilderPage() {
     saveTimer.current = setTimeout(triggerSave, 30000)
   }, [triggerSave])
 
-  // Schedule auto-save when sections change
   useEffect(() => {
     if (!loading) debouncedSave()
     return () => {
       if (saveTimer.current) clearTimeout(saveTimer.current)
     }
   }, [store.sections, loading, debouncedSave])
-
-  // Save assistant message to DB
-  const saveAssistantMessage = useCallback(async (content: string) => {
-    const msg: ResumeMessage = {
-      id: crypto.randomUUID(),
-      role: "assistant",
-      content,
-      section: store.currentSection,
-      created_at: new Date().toISOString(),
-    }
-    store.addMessage(msg)
-
-    try {
-      await fetch(`/api/resume/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sections: store.sections,
-          current_section: store.currentSection,
-        }),
-      })
-    } catch {
-      // Silently fail
-    }
-  }, [id, store])
 
   async function handleSend(message: string) {
     const keyData = await getKey()
@@ -141,6 +121,7 @@ export default function ResumeBuilderPage() {
           resumeState: store.sections,
           messages: store.messages.map((m) => ({ role: m.role, content: m.content })),
           resumeId: id,
+          targetJd,
         }),
       })
 
@@ -148,7 +129,14 @@ export default function ResumeBuilderPage() {
         const errData = await res.json().catch(() => ({ error: "Request failed" }))
         const errorMsg = errData.error || "Request failed"
         store.setError(errorMsg)
-        await saveAssistantMessage(`Error: ${errorMsg}`)
+        const errMsg: ResumeMessage = {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: `Error: ${errorMsg}`,
+          section: store.currentSection,
+          created_at: new Date().toISOString(),
+        }
+        store.addMessage(errMsg)
         setStreaming(false)
         return
       }
@@ -168,23 +156,55 @@ export default function ResumeBuilderPage() {
 
       store.setError(null)
 
-      // Try to extract resume data from response
-      try {
-        const parsed = JSON.parse(fullResponse)
-        if (parsed.sections) {
-          store.setSections(parsed.sections)
-        }
-        if (parsed.currentSection) {
-          store.setCurrentSection(parsed.currentSection)
-        }
-      } catch {
-        // Response is plain text — that's fine
+      // Parse and extract data from response
+      const parsed = parseAiResponse(fullResponse)
+      const displayText = parsed.text || fullResponse
+
+      // Show streaming text in chat
+      const aiMsg: ResumeMessage = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: displayText,
+        section: store.currentSection,
+        created_at: new Date().toISOString(),
+      }
+      store.addMessage(aiMsg)
+
+      // Merge extracted data into sections
+      if (parsed.sectionData) {
+        store.mergeSectionData(parsed.sectionData.section, parsed.sectionData.data)
       }
 
-      await saveAssistantMessage(fullResponse)
+      // Auto-advance on SECTION_COMPLETE
+      if (parsed.sectionComplete) {
+        const nextIdx = SECTION_ORDER.indexOf(store.currentSection) + 1
+        if (nextIdx < SECTION_ORDER.length && SECTION_ORDER[nextIdx] !== "review") {
+          const nextSection = SECTION_ORDER[nextIdx]
+          store.setCurrentSection(nextSection)
+        }
+      }
+
+      // Save to DB
+      await fetch(`/api/resume/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sections: store.sections,
+          current_section: parsed.sectionComplete
+            ? SECTION_ORDER[Math.min(SECTION_ORDER.indexOf(store.currentSection) + 1, SECTION_ORDER.length - 1)]
+            : store.currentSection,
+        }),
+      })
     } catch {
       store.setError("Network error")
-      await saveAssistantMessage("Error: Network error")
+      const errMsg: ResumeMessage = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: "Error: Network error",
+        section: store.currentSection,
+        created_at: new Date().toISOString(),
+      }
+      store.addMessage(errMsg)
     } finally {
       setStreaming(false)
     }
@@ -213,7 +233,6 @@ export default function ResumeBuilderPage() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
-      {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-background shrink-0">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => router.push("/resume")}>
@@ -236,20 +255,17 @@ export default function ResumeBuilderPage() {
             </div>
           </div>
         </div>
-
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {store.error && <span className="text-destructive">{store.error}</span>}
         </div>
       </div>
 
-      {/* Section indicator */}
       <SectionIndicator
         currentSection={store.currentSection}
         completedSections={completedSections}
         onSectionClick={handleSectionClick}
       />
 
-      {/* Split panel */}
       <div className="flex flex-1 overflow-hidden">
         <div className="w-[40%] min-w-[320px] border-r border-border">
           <ChatPanel
