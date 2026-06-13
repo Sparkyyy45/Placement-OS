@@ -8,7 +8,9 @@ import { PreviewPanel } from "@/components/resume/preview-panel"
 import { SectionIndicator } from "@/components/resume/section-indicator"
 import { useApiKey } from "@/hooks/use-api-key"
 import { useTrialQuota } from "@/hooks/use-trial-quota"
-import { Loader2, ArrowLeft, Save, Check } from "lucide-react"
+import { Loader2, ArrowLeft, Save, Check, Target, FileDown } from "lucide-react"
+import { JdAnalyzer } from "@/components/resume/jd-analyzer"
+import { PdfExport } from "@/components/resume/pdf-export"
 import { Button } from "@/components/ui/button"
 import { parseAiResponse } from "@/lib/ai/prompts"
 import type { SectionName, ResumeMessage } from "@/types/resume"
@@ -254,6 +256,14 @@ export default function ResumeBuilderPage() {
               )}
             </div>
           </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <JdAnalyzer
+            resumeId={id}
+            initialJd={targetJd}
+            onJdUpdate={setTargetJd}
+          />
+          <PdfExport sections={store.sections} name={store.name} />
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {store.error && <span className="text-destructive">{store.error}</span>}
