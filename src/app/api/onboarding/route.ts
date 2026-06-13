@@ -11,7 +11,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json()
-  const { role, tier, timeline, hours } = body
+  const { role, tier, timeline, hours, preferredProvider } = body
 
   if (!role || !tier || !timeline || !hours) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 })
@@ -25,18 +25,21 @@ export async function POST(request: Request) {
 
   const db = getServiceClient()
 
-  // Upsert user into our users table
+  const assessment = { role, tier, timeline, hours: Number(hours) }
+
   const { error } = await db.from("users").upsert(
     {
-      supabase_user_id: user.id,
+      id: user.id,
       email: user.email,
       target_role: role,
       target_company_tier: tier,
       placement_date: placementDate.toISOString(),
-      daily_hours_available: hours,
+      daily_hours_available: Number(hours),
       onboarding_complete: true,
+      onboarding_assessment: assessment,
+      preferred_provider: preferredProvider || null,
     },
-    { onConflict: "supabase_user_id" }
+    { onConflict: "id" }
   )
 
   if (error) {

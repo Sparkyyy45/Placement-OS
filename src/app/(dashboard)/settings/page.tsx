@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import { Label } from "@/components/ui/label"
 import { useApiKey } from "@/hooks/use-api-key"
-import { Check, X, Trash2, ExternalLink } from "lucide-react"
+import { Check, X, Trash2, ExternalLink, Save } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase-browser"
 
@@ -17,6 +18,32 @@ export default function SettingsPage() {
   const [selectedProvider, setSelectedProvider] = useState<"groq" | "openrouter" | "gemini">("groq")
   const [keyStatus, setKeyStatus] = useState<"idle" | "testing" | "valid" | "invalid">("idle")
   const [keyError, setKeyError] = useState("")
+
+  const [name, setName] = useState("")
+  const [college, setCollege] = useState("")
+  const [degree, setDegree] = useState("")
+  const [profileLoading, setProfileLoading] = useState(true)
+  const [profileSaving, setProfileSaving] = useState(false)
+  const [profileSaved, setProfileSaved] = useState(false)
+
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const res = await fetch("/api/profile")
+        if (res.ok) {
+          const data = await res.json()
+          if (data.name) setName(data.name)
+          if (data.college) setCollege(data.college)
+          if (data.degree) setDegree(data.degree)
+        }
+      } catch {
+        // Silently fail
+      } finally {
+        setProfileLoading(false)
+      }
+    }
+    loadProfile()
+  }, [])
 
   async function handleTest() {
     setKeyStatus("testing")
@@ -50,6 +77,23 @@ export default function SettingsPage() {
     removeKey()
   }
 
+  async function handleSaveProfile() {
+    setProfileSaving(true)
+    try {
+      await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, college, degree }),
+      })
+      setProfileSaved(true)
+      setTimeout(() => setProfileSaved(false), 2000)
+    } catch {
+      // Silently fail
+    } finally {
+      setProfileSaving(false)
+    }
+  }
+
   async function handleLogout() {
     const supabase = createClient()
     await supabase.auth.signOut()
@@ -64,6 +108,58 @@ export default function SettingsPage() {
           Manage your profile and API key.
         </p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Profile</CardTitle>
+          <CardDescription>Your personal details.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {profileLoading ? (
+            <p className="text-sm text-muted-foreground">Loading...</p>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  placeholder="Your full name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="college">College</Label>
+                <Input
+                  id="college"
+                  placeholder="Your college or university"
+                  value={college}
+                  onChange={(e) => setCollege(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="degree">Degree</Label>
+                <Input
+                  id="degree"
+                  placeholder="B.Tech CSE, B.Sc Statistics, etc."
+                  value={degree}
+                  onChange={(e) => setDegree(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Button onClick={handleSaveProfile} disabled={profileSaving}>
+                  {profileSaving ? "Saving..." : <><Save className="h-4 w-4 mr-1" /> Save</>}
+                </Button>
+                {profileSaved && (
+                  <span className="text-sm text-green-600 flex items-center gap-1">
+                    <Check className="h-4 w-4" /> Saved
+                  </span>
+                )}
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
