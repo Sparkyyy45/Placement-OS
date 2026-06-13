@@ -3,31 +3,31 @@
 ## Sprint Overview
 
 ```
-Sprint  0:  Foundation      (Week 1)     Setup & ship skeleton
-Sprint  1:  Identity        (Week 2)     Auth + Onboarding
-Sprint  2:  Infrastructure  (Week 3)     BYOK + Dashboard + Settings
-─────────────────────────────────────────────────────  BUILD FREEZE 1 — usable product with auth
-Sprint  3:  Resume Core     (Week 4)     Chat engine + builder canvas
-Sprint  4:  Resume Sections (Week 5)     All 6 sections + live preview
-Sprint  5:  Resume Polish   (Week 6)     JD analyzer + ATS + PDF export
-─────────────────────────────────────────────────────  BUILD FREEZE 2 — ship Resume Builder
-Sprint  6:  Interview Prep  (Week 7)     Mode select + pre-flight + MediaPipe
-Sprint  7:  Interview Live  (Week 8)     Session screen + speech + scoring
-Sprint  8:  Interview Ship  (Week 9)     Reports + JD mode + typed fallback
-─────────────────────────────────────────────────────  BUILD FREEZE 3 — ship Interview Coach
-Sprint  9:  Roadmap Core    (Week 10)    Generation + timeline + week view
-Sprint 10:  Roadmap Smart   (Week 11)    Adaptive engine + crunch + progress
-─────────────────────────────────────────────────────  BUILD FREEZE 4 — ship Roadmap
-Sprint 11:  The Flywheel    (Week 12)    Skill Graph + cross-module sync
-Sprint 12:  Launch Prep     (Week 13)    Testing, SEO, analytics, docs
-─────────────────────────────────────────────────────  SHIP v1 🚀
+Sprint  0:  Foundation       ✅  (Week 1)     Setup & ship skeleton
+Sprint  1:  Identity         ✅  (Week 2)     Auth + Onboarding
+Sprint  2:  Infrastructure   ✅  (Week 3)     BYOK + Dashboard + Settings
+─────────────────────────────────────────  BUILD FREEZE 1 — usable product with auth
+Sprint  3:  Resume Core      ✅  (Week 4)     Chat engine + builder canvas
+Sprint  4:  Resume Sections     (Week 5)     All 6 sections + live preview
+Sprint  5:  Resume Polish       (Week 6)     JD analyzer + ATS + PDF export
+─────────────────────────────────────────  BUILD FREEZE 2 — ship Resume Builder
+Sprint  6:  Interview Prep      (Week 7)     Mode select + pre-flight + MediaPipe
+Sprint  7:  Interview Live      (Week 8)     Session screen + speech + scoring
+Sprint  8:  Interview Ship      (Week 9)     Reports + JD mode + typed fallback
+─────────────────────────────────────────  BUILD FREEZE 3 — ship Interview Coach
+Sprint  9:  Roadmap Core        (Week 10)    Generation + timeline + week view
+Sprint 10:  Roadmap Smart       (Week 11)    Adaptive engine + crunch + progress
+─────────────────────────────────────────  BUILD FREEZE 4 — ship Roadmap
+Sprint 11:  The Flywheel        (Week 12)    Skill Graph + cross-module sync
+Sprint 12:  Launch Prep         (Week 13)    Testing, SEO, analytics, docs
+─────────────────────────────────────────  SHIP v1 🚀
 ```
 
 **Total: 13 Sprints = 13 weeks**
 
 ---
 
-## Sprint 0 — Foundation (Week 1)
+## Sprint 0 — Foundation (Week 1) ✅
 
 **Theme:** Get the project standing on all three legs — Vercel, Supabase, Upstash — with CI/CD.
 
@@ -59,7 +59,7 @@ Sprint 12:  Launch Prep     (Week 13)    Testing, SEO, analytics, docs
 
 ---
 
-## Sprint 1 — Identity (Week 2)
+## Sprint 1 — Identity (Week 2) ✅
 
 **Theme:** Authentication + onboarding assessment + layout shell.
 
@@ -89,7 +89,7 @@ Sprint 12:  Launch Prep     (Week 13)    Testing, SEO, analytics, docs
 
 ---
 
-## Sprint 2 — Infrastructure (Week 3)
+## Sprint 2 — Infrastructure (Week 3) ✅
 
 **Theme:** BYOK setup, trial quota, rate limiting, settings page, dashboard populated.
 
@@ -121,7 +121,7 @@ Sprint 12:  Launch Prep     (Week 13)    Testing, SEO, analytics, docs
 
 ---
 
-## Sprint 3 — Resume Core (Week 4)
+## Sprint 3 — Resume Core (Week 4) ✅
 
 **Theme:** Resume list page, builder split-panel layout, AI chat engine.
 
@@ -129,16 +129,16 @@ Sprint 12:  Launch Prep     (Week 13)    Testing, SEO, analytics, docs
 
 | Task | Hours | Details |
 |---|---|---|
-| 3.1 Resume list page | 3 | `/resume` — card grid, create button, free tier limit display, empty state |
-| 3.2 POST /api/resume | 2 | Create resume with default template, return with empty sections |
-| 3.3 Resume builder layout | 4 | Split panel (40/60), resizable divider, section indicator bar |
-| 3.4 AI chat panel | 4 | Message list (user + AI bubbles), streaming text display, input with send button |
-| 3.5 Live preview panel | 3 | Template renderer (stub), updates as data fills, scrollable |
-| 3.6 Section state machine | 3 | States: personal → education → skills → projects → experience → achievements → review |
-| 3.7 /api/ai/chat endpoint | 6 | Full resume builder prompt, section context, BYOK proxy, SSE streaming |
-| 3.8 Personal info extraction | 2 | Name, college, degree, grad year — AI probes, extracts, updates preview |
-| 3.9 Education section | 2 | College details, GPA, coursework — AI extracts and structures |
-| 3.10 Auto-save (debounced) | 3 | 30-second debounce on data change, "Saved" badge, network error retry |
+| 3.1 Resume list page ✅ | 3 | `/resume` — card grid, create button, free tier limit display, empty state |
+| 3.2 POST /api/resume ✅ | 2 | Create resume with default template, return with empty sections |
+| 3.3 Resume builder layout ✅ | 4 | Split panel (40/60), resizable divider, section indicator bar |
+| 3.4 AI chat panel ✅ | 4 | Message list (user + AI bubbles), streaming text display, input with send button |
+| 3.5 Live preview panel ✅ | 3 | Template renderer (stub), updates as data fills, scrollable |
+| 3.6 Section state machine ✅ | 3 | States: personal → education → skills → projects → experience → achievements → review |
+| 3.7 /api/ai/chat endpoint ✅ | 6 | Full resume builder prompt, section context, BYOK proxy, SSE streaming |
+| 3.8 Personal info extraction ✅ | 2 | Name, college, degree, grad year — AI probes, extracts, updates preview |
+| 3.9 Education section ✅ | 2 | College details, GPA, coursework — AI extracts and structures |
+| 3.10 Auto-save (debounced) ✅ | 3 | 30-second debounce on data change, "Saved" badge, network error retry |
 
 **Definition of Done:**
 - User creates resume → sees split-panel layout
