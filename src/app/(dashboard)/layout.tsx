@@ -13,8 +13,8 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useUIStore } from "@/store/ui-store"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { TrialBanner } from "@/components/shared/trial-banner"
+import { UserMenu } from "@/components/shared/user-menu"
 
 const sidebarLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -77,9 +77,7 @@ export default function DashboardLayout({
 
         <div className="border-t border-border p-4">
           <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="text-xs">U</AvatarFallback>
-            </Avatar>
+            <UserMenu />
             {sidebarOpen && (
               <span className="text-xs text-muted-foreground">Student</span>
             )}
@@ -87,8 +85,9 @@ export default function DashboardLayout({
         </div>
       </aside>
 
-      <main className="flex-1 overflow-auto">
-        <div className="max-w-6xl mx-auto p-6">{children}</div>
+      <main className="flex-1 overflow-auto flex flex-col">
+        <TrialBanner />
+        <div className="max-w-6xl mx-auto p-6 flex-1">{children}</div>
       </main>
     </div>
   )
